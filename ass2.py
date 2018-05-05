@@ -7,7 +7,7 @@ FILENAME = ""
 
 
 def preprocess(file_to_open):
-    training_data = pandas.read_csv(FILENAME)
+    training_data = pd.read_csv(FILENAME)
     with open(file_to_open, "r") as f:
         reader = csv.reader(f)
         data = list(reader)
