@@ -1,16 +1,12 @@
 import sklearn
 import numpy as np
 import pandas as pd
-import csv
 
-FILENAME = ""
+FILENAME = "dev_raw.csv"
 
 
 def preprocess(file_to_open):
-    training_data = pd.read_csv(FILENAME)
-    with open(file_to_open, "r") as f:
-        reader = csv.reader(f)
-        data = list(reader)
+    training_data = pd.read_csv(FILENAME, header=None)
 
     print(training_data);
     return None
