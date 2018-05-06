@@ -22,7 +22,7 @@ def main():
 
 
 def ranges(age):
-    if  age <= 16:
+    if age <= 16:
         return "14-16"
     elif age <= 26:
         return "24-26"
@@ -41,11 +41,10 @@ def preprocess(file_path, test=False):
 
 
 def train(training_data, dev_data, test_data):
-
     vectoriser = TfidfVectorizer(stop_words='english')
     train_vector = vectoriser.fit_transform(training_data["text"])
     dev_vector = vectoriser.transform(dev_data["text"])
-    test_vector = vectoriser.transform(test_data.iloc[:,1])
+    test_vector = vectoriser.transform(test_data.iloc[:, 1])
 
     clf = MultinomialNB().fit(train_vector, training_data["age"])
 
@@ -53,6 +52,10 @@ def train(training_data, dev_data, test_data):
 
     print(predictions)
     return None
+
+
+def evaluate():
+    pass
 
 
 def predict():
