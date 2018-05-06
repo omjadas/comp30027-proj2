@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pandas = "*"
 numpy = "*"
 scipy = "*"
+pandas = "*"
 scikit-learn = "*"
 
 [dev-packages]
