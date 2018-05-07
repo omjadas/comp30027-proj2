@@ -45,7 +45,7 @@ def train(training_data, dev_data, test_data):
     vectoriser = TfidfVectorizer(stop_words="english")
     train_vector = vectoriser.fit_transform(training_data["text"])
     dev_vector = vectoriser.transform(dev_data["text"])
-    test_vector = vectoriser.transform(test_data.iloc[:, 1])
+    test_vector = vectoriser.transform(test_data["text"])
 
     clf = MultinomialNB().fit(train_vector, training_data["age"])
 
