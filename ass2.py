@@ -24,14 +24,14 @@ def main():
 
 def ranges(age):
     if age <= 16:
-        return "14-16"
+        return (14, 16)
     elif age <= 26:
-        return "24-26"
+        return (24, 26)
     elif age <= 36:
-        return "34-36"
+        return (34, 36)
     elif age <= 46:
-        return "44-46"
-    return "?"
+        return (44, 46)
+    return None
 
 
 def preprocess(file_path, test=False):
