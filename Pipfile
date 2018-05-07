@@ -8,6 +8,7 @@ numpy = "*"
 scipy = "*"
 pandas = "*"
 scikit-learn = "*"
+nltk = "*"
 
 [dev-packages]
 pylint = "*"

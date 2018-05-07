@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import pandas as pd
+from nltk.stem.snowball import SnowballStemmer
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -8,12 +9,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.externals import joblib
 
 TRAIN = "train_raw.csv"
 DEV = "dev_raw.csv"
 TEST = "test_raw.csv"
 
-CLASSES = []
+
 
 
 def main():
@@ -22,6 +24,7 @@ def main():
     test_data = preprocess(TEST, test=True)
 
     training_data["age"] = training_data["age"].map(ranges)
+    dev_data["age"] = dev_data["age"].map(ranges)
 
     train(training_data, dev_data, test_data)
     return None
@@ -29,14 +32,14 @@ def main():
 
 def ranges(age):
     if age <= 16:
-        return json.dumps([14, 16])
+        return "14, 16"
     elif age <= 26:
-        return json.dumps([24, 26])
+        return "24, 26"
     elif age <= 36:
-        return json.dumps([34, 36])
+        return "34, 36"
     elif age <= 46:
-        return json.dumps([44, 46])
-    return None
+        return "44, 46"
+    return "?"
 
 
 def preprocess(file_path, test=False):
@@ -47,31 +50,33 @@ def preprocess(file_path, test=False):
 
 
 def train(training_data, dev_data, test_data):
-    # vectoriser = TfidfVectorizer(stop_words="english")
-    # train_vector = vectoriser.fit_transform(training_data["text"])
-    # dev_vector = vectoriser.transform(dev_data["text"])
-    # test_vector = vectoriser.transform(test_data["text"])
-
-    clf = Pipeline([('vect', CountVectorizer()),
+    clf = Pipeline([('vect', CountVectorizer(stop_words="english")),
                     ('tfidf', TfidfTransformer()),
                     ('clf', MultinomialNB()), ])
 
-    # clf = MultinomialNB().fit(train_vector, training_data["age"])
-    text_clf = Pipeline([('vect', CountVectorizer()),
+    text_clf = Pipeline([('vect', CountVectorizer(stop_words="english")),
                          ('tfidf', TfidfTransformer()),
                          ('clf', SGDClassifier(loss='hinge', penalty='l2',
                                                alpha=1e-3, random_state=42,
                                                max_iter=5, tol=None)), ])
-    # text_clf = SGDClassifier(loss='hinge', penalty='l2',
-    #                          alpha=1e-3, random_state=42,
-    # max_iter=5, tol=None).fit(train_vector, training_data["age"])
-    clf.fit(training_data["text"], training_data["age"])
-    predictions = clf.predict(dev_data["text"])
-    text_clf.fit(training_data["text"], training_data["age"])
-    predictions2 = text_clf.predict(dev_data["text"])
 
-    print(evaluate(predictions, dev_data))
-    print(evaluate(predictions2, dev_data))
+    parameters = {'vect__ngram_range': [(1, 1), (1, 2)],
+                  'tfidf__use_idf': (True, False),
+                  'clf__alpha': (1e-2, 1e-3), }
+
+    gs_clf = GridSearchCV(clf, parameters, n_jobs=6    )
+    gs_clf.fit(training_data["text"], training_data["age"])
+    joblib.dump(gs_clf, "gs_clf.pkl")
+
+    clf.fit(training_data["text"], training_data["age"])
+    text_clf.fit(training_data["text"], training_data["age"])
+
+    print(clf.score(dev_data["text"], dev_data["age"]))
+    print(text_clf.score(dev_data["text"], dev_data["age"]))
+    print(gs_clf.score(dev_data["text"], dev_data["age"]))
+
+    # print(evaluate(predictions, dev_data))
+    # print(evaluate(predictions2, dev_data))
     return None
 
 
