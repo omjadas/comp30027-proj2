@@ -60,7 +60,7 @@ def train(training_data, dev_data, test_data):
                        ('tfidf', TfidfTransformer()),
                        ('clf', MultinomialNB()), ])
 
-    svm_clf = Pipeline([('vect', CountVectorizer(stop_words="english")),
+    svm_clf = Pipeline([('vect', StemmedCountVectorizer(stop_words="english")),
                         ('tfidf', TfidfTransformer()),
                         ('clf', SGDClassifier(loss='hinge', penalty='l2',
                                               alpha=1e-3, random_state=42,
