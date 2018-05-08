@@ -32,8 +32,6 @@ def main():
     print("training_data: {}".format(training_data.shape))
     print("dev_data: {}".format(dev_data.shape))
 
-    exit()
-
     train(training_data, dev_data, test_data)
     return None
 
