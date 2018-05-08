@@ -20,18 +20,6 @@ def main():
     dev_data = preprocess(DEV)
     test_data = preprocess(TEST, test=True)
 
-    training_data["age"] = training_data["age"].map(ranges)
-    dev_data["age"] = dev_data["age"].map(ranges)
-
-    print("training_data: {}".format(training_data.shape))
-    print("dev_data: {}".format(dev_data.shape))
-
-    training_data = training_data[training_data.age != "?"]
-    dev_data = dev_data[dev_data.age != "?"]
-
-    print("training_data: {}".format(training_data.shape))
-    print("dev_data: {}".format(dev_data.shape))
-
     train(training_data, dev_data, test_data)
     return None
 
@@ -52,6 +40,9 @@ def preprocess(file_path, test=False):
     data = pd.read_csv(file_path, header=None)
     data = data[[2, 6]]
     data.columns = ["age", "text"]
+    if not test:
+        data = data["age"].map(ranges)
+        data = data[data.age != "?"]
     return data
 
 
