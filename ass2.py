@@ -35,13 +35,13 @@ def main():
 
 def ranges(age):
     if 14 <= age <= 16:
-        return "14, 16"
+        return "14-16"
     elif 24 <= age <= 26:
-        return "24, 26"
+        return "24-26"
     elif 34 <= age <= 36:
-        return "34, 36"
+        return "34-36"
     elif 44 <= age <= 46:
-        return "44, 46"
+        return "44-46"
     return "?"
 
 
@@ -84,8 +84,17 @@ def train(training_data, dev_data, test_data):
 
     # print("NB: {}".format(nb_clf.score(dev_data["text"], dev_data["age"])))
     # print("SVM: {}".format(svm_clf.score(dev_data["text"], dev_data["age"])))
-    print("LR: {}".format(lr_clf.score(dev_data["text"], dev_data["age"])))
+    # print("LR: {}".format(lr_clf.score(dev_data["text"], dev_data["age"])))
     # print("GS: {}".format(gs_clf.score(dev_data["text"], dev_data["age"])))
+
+    predictions = lr_clf.predict(test_data["text"])
+
+    print("Id,Prediction")
+
+    i = 1
+    for prediction in predictions:
+        print("4{},{}".format(i, prediction))
+        i += 1
 
     # for param_name in sorted(parameters.keys()):
     #     print("{}: {}".format(param_name, gs_clf.best_params_[param_name]))
