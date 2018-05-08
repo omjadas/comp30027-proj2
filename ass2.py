@@ -15,8 +15,6 @@ DEV = "dev_raw.csv"
 TEST = "test_raw.csv"
 
 
-
-
 def main():
     training_data = preprocess(TRAIN)
     dev_data = preprocess(DEV)
@@ -25,18 +23,29 @@ def main():
     training_data["age"] = training_data["age"].map(ranges)
     dev_data["age"] = dev_data["age"].map(ranges)
 
+    print("training_data: {}".format(training_data.shape))
+    print("dev_data: {}".format(dev_data.shape))
+
+    training_data = training_data[training_data.age != "?"]
+    dev_data = dev_data[dev_data.age != "?"]
+
+    print("training_data: {}".format(training_data.shape))
+    print("dev_data: {}".format(dev_data.shape))
+
+    exit()
+
     train(training_data, dev_data, test_data)
     return None
 
 
 def ranges(age):
-    if age <= 16:
+    if 14 <= age <= 16:
         return "14, 16"
-    elif age <= 26:
+    elif 24 <= age <= 26:
         return "24, 26"
-    elif age <= 36:
+    elif 34 <= age <= 36:
         return "34, 36"
-    elif age <= 46:
+    elif 44 <= age <= 46:
         return "44, 46"
     return "?"
 
@@ -63,7 +72,7 @@ def train(training_data, dev_data, test_data):
                   'tfidf__use_idf': (True, False),
                   'clf__alpha': (1e-2, 1e-3), }
 
-    gs_clf = GridSearchCV(clf, parameters, n_jobs=6    )
+    gs_clf = GridSearchCV(clf, parameters, n_jobs=6)
     gs_clf.fit(training_data["text"], training_data["age"])
     joblib.dump(gs_clf, "gs_clf.pkl")
 
