@@ -7,12 +7,21 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import SGDClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals import joblib
 
 TRAIN = "./data/train_raw.csv"
 DEV = "./data/dev_raw.csv"
 TEST = "./data/test_raw.csv"
+
+stemmer = SnowballStemmer("english", ignore_stopwords=True)
+
+
+class StemmedCountVectorizer(CountVectorizer):
+    def build_analyzer(self):
+        analyzer = super(StemmedCountVectorizer, self).build_analyzer()
+        return lambda doc: ([stemmer.stem(w) for w in analyzer(doc)])
 
 
 def main():
@@ -47,30 +56,39 @@ def preprocess(file_path, test=False):
 
 
 def train(training_data, dev_data, test_data):
-    clf = Pipeline([('vect', CountVectorizer(stop_words="english")),
-                    ('tfidf', TfidfTransformer()),
-                    ('clf', MultinomialNB()), ])
+    nb_clf = Pipeline([('vect', StemmedCountVectorizer(stop_words="english")),
+                       ('tfidf', TfidfTransformer()),
+                       ('clf', MultinomialNB()), ])
 
-    text_clf = Pipeline([('vect', CountVectorizer(stop_words="english")),
-                         ('tfidf', TfidfTransformer()),
-                         ('clf', SGDClassifier(loss='hinge', penalty='l2',
-                                               alpha=1e-3, random_state=42,
-                                               max_iter=5, tol=None)), ])
+    svm_clf = Pipeline([('vect', CountVectorizer(stop_words="english")),
+                        ('tfidf', TfidfTransformer()),
+                        ('clf', SGDClassifier(loss='hinge', penalty='l2',
+                                              alpha=1e-3, random_state=42,
+                                              max_iter=5, tol=None,
+                                              n_jobs=6)), ])
 
-    parameters = {'vect__ngram_range': [(1, 1), (1, 2)],
-                  'tfidf__use_idf': (True, False),
-                  'clf__alpha': (1e-2, 1e-3), }
+    lr_clf = Pipeline([('vect', StemmedCountVectorizer(ngram_range=(1, 2))),
+                       ('tfidf', TfidfTransformer(use_idf=True)),
+                       ('clf', LogisticRegression()), ])
 
-    gs_clf = GridSearchCV(clf, parameters, n_jobs=6)
-    gs_clf.fit(training_data["text"], training_data["age"])
-    joblib.dump(gs_clf, "gs_clf.pkl")
+    parameters = {'vect__stop_words': ("english", None),
+                  'vect__ngram_range': [(1, 1), (1, 2)],
+                  'tfidf__use_idf': (True, False), }
 
-    clf.fit(training_data["text"], training_data["age"])
-    text_clf.fit(training_data["text"], training_data["age"])
+    # gs_clf = GridSearchCV(lr_clf, parameters, n_jobs=6)
+    # gs_clf.fit(training_data["text"], training_data["age"])
 
-    print(clf.score(dev_data["text"], dev_data["age"]))
-    print(text_clf.score(dev_data["text"], dev_data["age"]))
-    print(gs_clf.score(dev_data["text"], dev_data["age"]))
+    # nb_clf.fit(training_data["text"], training_data["age"])
+    # svm_clf.fit(training_data["text"], training_data["age"])
+    lr_clf.fit(training_data["text"], training_data["age"])
+
+    # print("NB: {}".format(nb_clf.score(dev_data["text"], dev_data["age"])))
+    # print("SVM: {}".format(svm_clf.score(dev_data["text"], dev_data["age"])))
+    print("LR: {}".format(lr_clf.score(dev_data["text"], dev_data["age"])))
+    # print("GS: {}".format(gs_clf.score(dev_data["text"], dev_data["age"])))
+
+    # for param_name in sorted(parameters.keys()):
+    #     print("{}: {}".format(param_name, gs_clf.best_params_[param_name]))
 
     # print(evaluate(predictions, dev_data))
     # print(evaluate(predictions2, dev_data))
