@@ -41,7 +41,7 @@ def preprocess(file_path, test=False):
     data = data[[2, 6]]
     data.columns = ["age", "text"]
     if not test:
-        data = data["age"].map(ranges)
+        data["age"] = data["age"].map(ranges)
         data = data[data.age != "?"]
     return data
 
