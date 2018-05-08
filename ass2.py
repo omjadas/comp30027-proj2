@@ -10,9 +10,9 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals import joblib
 
-TRAIN = "train_raw.csv"
-DEV = "dev_raw.csv"
-TEST = "test_raw.csv"
+TRAIN = "./data/train_raw.csv"
+DEV = "./data/dev_raw.csv"
+TEST = "./data/test_raw.csv"
 
 
 def main():
