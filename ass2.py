@@ -1,6 +1,5 @@
 import json
 import time
-import numpy as np
 import pandas as pd
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.pipeline import Pipeline
@@ -10,7 +9,6 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import SGDClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
-from sklearn.externals import joblib
 
 TRAIN = "./data/train_raw.csv"
 DEV = "./data/dev_raw.csv"
