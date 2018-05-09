@@ -1,4 +1,3 @@
-import json
 import time
 import pandas as pd
 from nltk.stem.snowball import SnowballStemmer
