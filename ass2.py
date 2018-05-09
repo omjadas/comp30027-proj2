@@ -13,7 +13,7 @@ TRAIN = "./data/train_raw.csv"
 DEV = "./data/dev_raw.csv"
 TEST = "./data/test_raw.csv"
 
-stemmer = SnowballStemmer("english", ignore_stopwords=True)
+stemmer = SnowballStemmer("english")
 
 
 class StemmedCountVectorizer(CountVectorizer):
@@ -63,12 +63,12 @@ def train(training_data, dev_data, test_data):
                   "vect__stop_words": ("english", None),
                   "tfidf__use_idf": (True, False)}
 
-    nb_clf = Pipeline([("vect", StemmedCountVectorizer(stop_words="english")),
-                       ("tfidf", TfidfTransformer()),
+    nb_clf = Pipeline([("vect", StemmedCountVectorizer(stop_words="english", ngram_range=(1, 2))),
+                       ("tfidf", TfidfTransformer(use_idf=True)),
                        ("clf", MultinomialNB()), ])
 
-    svm_clf = Pipeline([("vect", StemmedCountVectorizer(stop_words="english")),
-                        ("tfidf", TfidfTransformer()),
+    svm_clf = Pipeline([("vect", StemmedCountVectorizer(ngram_range=(1, 2))),
+                        ("tfidf", TfidfTransformer(use_idf=True)),
                         ("clf", SGDClassifier(loss="hinge", penalty="l2",
                                               alpha=1e-3, random_state=42,
                                               max_iter=5, tol=None,
