@@ -1,4 +1,5 @@
 import json
+import time
 import numpy as np
 import pandas as pd
 from nltk.stem.snowball import SnowballStemmer
@@ -25,11 +26,16 @@ class StemmedCountVectorizer(CountVectorizer):
 
 
 def main():
+    start = time.time()
+
     training_data = preprocess(TRAIN)
     dev_data = preprocess(DEV)
     test_data = preprocess(TEST, test=True)
 
     train(training_data, dev_data, test_data)
+
+    end = time.time()
+    print(end - start)
     return None
 
 
@@ -71,16 +77,15 @@ def train(training_data, dev_data, test_data):
                        ('tfidf', TfidfTransformer(use_idf=True)),
                        ('clf', LogisticRegression()), ])
 
-    parameters = {'vect__stop_words': ("english", None),
-                  'vect__ngram_range': [(1, 1), (1, 2)],
-                  'tfidf__use_idf': (True, False), }
+    parameters = {'clf__C': np.logspace(0, 4, 10),
+                  'clf__penalty': ('l1', 'l2')}
 
     # gs_clf = GridSearchCV(lr_clf, parameters, n_jobs=6)
     # gs_clf.fit(training_data["text"], training_data["age"])
 
     # nb_clf.fit(training_data["text"], training_data["age"])
     # svm_clf.fit(training_data["text"], training_data["age"])
-    lr_clf.fit(training_data["text"], training_data["age"])
+    # lr_clf.fit(training_data["text"], training_data["age"])
 
     # print("NB: {}".format(nb_clf.score(dev_data["text"], dev_data["age"])))
     # print("SVM: {}".format(svm_clf.score(dev_data["text"], dev_data["age"])))
@@ -93,7 +98,7 @@ def train(training_data, dev_data, test_data):
 
     i = 1
     for prediction in predictions:
-        print("4{},{}".format(i, prediction))
+        print("3{},{}".format(i, prediction))
         i += 1
 
     # for param_name in sorted(parameters.keys()):
