@@ -8,6 +8,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import SGDClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix
 
 TRAIN = "./data/train_raw.csv"
 DEV = "./data/dev_raw.csv"
@@ -93,6 +94,12 @@ def train(training_data, dev_data, test_data):
     predictions = lr_clf.predict(test_data["text"])
     output(predictions)
     return None
+
+
+def generate_confusion_matrix(classifier, data):
+    predictions = classifier.predict(data["text"])
+    cnf_matrix = confusion_matrix(data["age"], predictions)
+    return cnf_matrix
 
 
 def fit(classifier, training_data):
