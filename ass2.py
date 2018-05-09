@@ -33,7 +33,7 @@ def main():
     train(training_data, dev_data, test_data)
 
     end = time.time()
-    print("\n{} seconds".format(end - start))
+    # print("\n{} seconds".format(end - start))
     return None
 
 
@@ -81,6 +81,11 @@ def train(training_data, dev_data, test_data):
 
     gs_clf = GridSearchCV(lr_clf, parameters, n_jobs=6)
 
+    # fit(nb_clf, training_data)
+    # fit(svm_clf, training_data)
+    fit(lr_clf, training_data)
+    # fit(gs_clf, training_data)
+
     # score(nb_clf, "NB", training_data, dev_data)
     # score(svm_clf, "SVM", training_data, dev_data)
     # score(lr_clf, "LR", training_data, dev_data)
@@ -91,8 +96,12 @@ def train(training_data, dev_data, test_data):
     return None
 
 
-def score(classifier, classifier_name, training_data, dev_data):
+def fit(classifier, training_data):
     classifier.fit(training_data["text"], training_data["age"])
+    return None
+
+
+def score(classifier, classifier_name, training_data, dev_data):
     score = classifier.score(dev_data["text"], dev_data["age"])
     print("{}: {}".format(classifier_name, score))
     return None
