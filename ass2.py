@@ -35,7 +35,7 @@ def main():
     train(training_data, dev_data, test_data)
 
     end = time.time()
-    print(end - start)
+    print("\n{} seconds".format(end - start))
     return None
 
 
@@ -62,65 +62,60 @@ def preprocess(file_path, test=False):
 
 
 def train(training_data, dev_data, test_data):
-    nb_clf = Pipeline([('vect', StemmedCountVectorizer(stop_words="english")),
-                       ('tfidf', TfidfTransformer()),
-                       ('clf', MultinomialNB()), ])
+    parameters = {"vect__ngram_range": [(1, 1), (1, 2)],
+                  "vect__stop_words": ("english", None),
+                  "tfidf__use_idf": (True, False)}
 
-    svm_clf = Pipeline([('vect', StemmedCountVectorizer(stop_words="english")),
-                        ('tfidf', TfidfTransformer()),
-                        ('clf', SGDClassifier(loss='hinge', penalty='l2',
+    nb_clf = Pipeline([("vect", StemmedCountVectorizer(stop_words="english")),
+                       ("tfidf", TfidfTransformer()),
+                       ("clf", MultinomialNB()), ])
+
+    svm_clf = Pipeline([("vect", StemmedCountVectorizer(stop_words="english")),
+                        ("tfidf", TfidfTransformer()),
+                        ("clf", SGDClassifier(loss="hinge", penalty="l2",
                                               alpha=1e-3, random_state=42,
                                               max_iter=5, tol=None,
                                               n_jobs=6)), ])
 
-    lr_clf = Pipeline([('vect', StemmedCountVectorizer(ngram_range=(1, 2))),
-                       ('tfidf', TfidfTransformer(use_idf=True)),
-                       ('clf', LogisticRegression()), ])
+    lr_clf = Pipeline([("vect", StemmedCountVectorizer(ngram_range=(1, 2))),
+                       ("tfidf", TfidfTransformer(use_idf=True)),
+                       ("clf", LogisticRegression()), ])
 
-    parameters = {'clf__C': np.logspace(0, 4, 10),
-                  'clf__penalty': ('l1', 'l2')}
+    gs_clf = GridSearchCV(lr_clf, parameters, n_jobs=6)
 
-    # gs_clf = GridSearchCV(lr_clf, parameters, n_jobs=6)
-    # gs_clf.fit(training_data["text"], training_data["age"])
-
-    # nb_clf.fit(training_data["text"], training_data["age"])
-    # svm_clf.fit(training_data["text"], training_data["age"])
-    # lr_clf.fit(training_data["text"], training_data["age"])
-
-    # print("NB: {}".format(nb_clf.score(dev_data["text"], dev_data["age"])))
-    # print("SVM: {}".format(svm_clf.score(dev_data["text"], dev_data["age"])))
-    # print("LR: {}".format(lr_clf.score(dev_data["text"], dev_data["age"])))
-    # print("GS: {}".format(gs_clf.score(dev_data["text"], dev_data["age"])))
+    # score(nb_clf, "NB", training_data, dev_data)
+    # score(svm_clf, "SVM", training_data, dev_data)
+    # score(lr_clf, "LR", training_data, dev_data)
+    # gs_score(gs_clf, parameters, training_data, dev_data)
 
     predictions = lr_clf.predict(test_data["text"])
+    output(predictions)
+    return None
+
+
+def score(classifier, classifier_name, training_data, dev_data):
+    classifier.fit(training_data["text"], training_data["age"])
+    score = classifier.score(dev_data["text"], dev_data["age"])
+    print("{}: {}".format(classifier_name, score))
+    return None
+
+
+def gs_score(classifier, parameters, training_data, dev_data):
+    score(classifier, "GS", training_data, dev_data)
+    for param_name in sorted(parameters.keys()):
+        print("{}: {}".format(param_name, classifier.best_params_[param_name]))
+    return None
+
+
+def output(predictions):
+    """Output the predictions to stdout in the form specified on Kaggle"""
 
     print("Id,Prediction")
-
     i = 1
     for prediction in predictions:
         print("3{},{}".format(i, prediction))
         i += 1
-
-    # for param_name in sorted(parameters.keys()):
-    #     print("{}: {}".format(param_name, gs_clf.best_params_[param_name]))
-
-    # print(evaluate(predictions, dev_data))
-    # print(evaluate(predictions2, dev_data))
     return None
-
-
-def evaluate(predictions, data):
-    correct = 0
-    total = 0
-    for i in predictions:
-        if json.loads(i)[0] <= data.iloc[total, 0] <= json.loads(i)[1]:
-            correct += 1
-        total += 1
-    return correct / total
-
-
-def predict():
-    pass
 
 
 if __name__ == "__main__":
